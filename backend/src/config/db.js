@@ -16,5 +16,3 @@ export const testConnection = async () => {
         console.error("Error connecting to the database:", error);
     }
 };
-
-testConnection();
