@@ -5,10 +5,9 @@ import notesRouter from "./route/notesRoute.js";
 import cors from "cors";
 
 const app = express();
-
+app.use(cors());
 const port = 3000;
 
-app.use(cors());
 app.use(express.json());
 
 app.use("/", helloRouter);
