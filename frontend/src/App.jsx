@@ -4,7 +4,7 @@ import { useEffect } from "react";
 function App() {
   const [notes, setNotes] = useState([]);
 
-  const baseUrl = "https://notes-app-chi-ebon.vercel.app/";
+  const baseUrl = "https://notes-app-chi-ebon.vercel.app";
 
   const fetchNotes = async () => {
     try {
