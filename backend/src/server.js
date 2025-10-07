@@ -1,20 +1,20 @@
 import express from "express";
+import cors from "cors";
 import { testConnection } from "./config/db.js";
 import helloRouter from "./route/helloRoute.js";
 import notesRouter from "./route/notesRoute.js";
-import cors from "cors";
 
 const app = express();
 
-// ✅ Izinkan domain utama + preview URL dari Vercel
+// ✅ Allow main + preview Vercel domains
 const allowedOrigins = [
   "https://last-project-notes.vercel.app",
-  /\.vercel\.app$/ // regex: izinkan semua subdomain vercel.app
+  /\.vercel\.app$/ // allow all vercel.app subdomains
 ];
 
 const corsOptions = {
   origin: function (origin, callback) {
-    if (!origin) return callback(null, true); // allow server-side tools
+    if (!origin) return callback(null, true);
     if (
       allowedOrigins.some((allowed) =>
         allowed instanceof RegExp ? allowed.test(origin) : allowed === origin
@@ -27,19 +27,24 @@ const corsOptions = {
   },
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true,
 };
 
+// 🟢 Apply CORS for every route and preflight
 app.use(cors(corsOptions));
 app.options("*", cors(corsOptions));
 
 app.use(express.json());
 
+// ✅ Manual CORS fallback — forces header for all routes
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
+  res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  next();
+});
+
 app.use("/", helloRouter);
 app.use(notesRouter);
 
-const port = 3000;
-app.listen(port, () => {
-  console.log(`✅ Server is running on http://localhost:${port}`);
-  testConnection();
-});
+// Vercel handler (no app.listen!)
+export default app;
