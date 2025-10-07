@@ -9,12 +9,11 @@ function App() {
   const fetchNotes = async () => {
     try {
       const res = await fetch(`${baseUrl}/notes`);
-
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       const result = await res.json();
-
-      setNotes(result.data);
+      setNotes(result.data || []);
     } catch (error) {
-      console.error("Error", error);
+      console.error("Fetch Notes Error:", error);
     }
   };
 
