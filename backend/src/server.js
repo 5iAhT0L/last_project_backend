@@ -6,10 +6,13 @@ import notesRouter from "./route/notesRoute.js";
 
 const app = express();
 
-// ✅ Allow main + preview Vercel domains
+// ✅ Panggil testConnection untuk memastikan koneksi DB aktif
+testConnection();
+
+// ✅ Izinkan domain frontend kamu + semua subdomain vercel
 const allowedOrigins = [
   "https://last-project-notes.vercel.app",
-  /\.vercel\.app$/, // allow all vercel.app subdomains
+  /\.vercel\.app$/,
 ];
 
 const corsOptions = {
@@ -22,35 +25,37 @@ const corsOptions = {
     ) {
       callback(null, true);
     } else {
+      console.log("❌ CORS blocked request from:", origin);
       callback(new Error("Not allowed by CORS"));
     }
   },
+  credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
 };
 
-// 🟢 Apply CORS globally (including preflight)
+// ✅ Apply CORS globally
 app.use(cors(corsOptions));
+
+// ✅ Handle preflight (OPTIONS)
 app.options("*", cors(corsOptions));
 
-app.use(express.json());
-
-// ✅ Manual fallback CORS — ensures header always sent
+// ✅ Tambahkan manual fallback header
 app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
+  res.header(
+    "Access-Control-Allow-Origin",
+    req.headers.origin || "https://last-project-notes.vercel.app"
+  );
   res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
   res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
   next();
 });
 
-// ✅ Routers
+app.use(express.json());
+
+// ✅ Routes
 app.use("/", helloRouter);
 app.use(notesRouter);
 
-// 🧠 Test DB connection once on cold start (Vercel build time)
-testConnection()
-  .then(() => console.log("✅ Database connection established successfully."))
-  .catch((err) => console.error("❌ Database connection failed:", err));
-
-// ⚡ Export app for Vercel serverless handler
+// ✅ Export untuk vercel
 export default app;
