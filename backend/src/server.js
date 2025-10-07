@@ -6,24 +6,31 @@ import cors from "cors";
 
 const app = express();
 
+// ✅ Izinkan domain utama + preview URL dari Vercel
+const allowedOrigins = [
+  "https://last-project-notes.vercel.app",
+  /\.vercel\.app$/ // regex: izinkan semua subdomain vercel.app
+];
+
 const corsOptions = {
-  origin: "https://last-project-notes.vercel.app",
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true); // allow server-side tools
+    if (
+      allowedOrigins.some((allowed) =>
+        allowed instanceof RegExp ? allowed.test(origin) : allowed === origin
+      )
+    ) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
-  optionsSuccessStatus: 200,
+  credentials: true,
 };
 
 app.use(cors(corsOptions));
-
-// 👇 Tambahkan ini (penting, untuk pastikan header lama dihapus)
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "https://last-project-notes.vercel.app");
-  res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  next();
-});
-
-// 👇 Tambahkan juga ini untuk handle preflight request OPTIONS
 app.options("*", cors(corsOptions));
 
 app.use(express.json());
