@@ -7,7 +7,7 @@ import cors from "cors";
 const app = express();
 
 var corsOptions = {
-  origin: "https://last-project-notes.vercel.app/",
+  origin: "https://last-project-notes.vercel.app",
   optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
 };
 
